@@ -6,9 +6,3 @@ services:
     command: tail -F anything
     volumes:
       - ../:/planner
-  simulator:
-    image: kristorferb/ros2_intro:1.0
-    ports:
-      - "5901:5901"
-      - "6080:6080"
-    network_mode: bridge

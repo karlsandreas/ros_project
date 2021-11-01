@@ -3,7 +3,7 @@ from model.model import Model
 from typing import List, Optional
 from model.operation import Operation, Transition
 from predicates.state import State
-from  predicates.guards import Guard
+from predicates.guards import Guard
 from predicates.actions import Action
     
 
@@ -20,5 +20,39 @@ def plan(state: State, goal: Guard, model: Model, max_depth: int = 20) -> Option
 
     In the runner, there is a mode to pre-start operations, but that should not be considered while planning
     """
+    s = state
+    stack = []
+    stack.append(s)
+    depth = max_depth
+    current_path = []
+    visited = []
+    while stack:
+        for op in model.operations:
+            current_state = stack.pop()
+            print('Current state ', current_state)
+            print('Current operation ', model.operations[op].eval(current_state))
+            if model.operations[op].eval(current_state):
+                depth -= 1
+                current_path.append(op)
+                visited.append(current_state)
+                t = model.operations[op].next_planning(current_state)
+                #print('next state', t)
+                if t not in stack:
+                    stack.append(t)
+                if not stack and not goal.eval(current_state):
+                    print('hej')
+        stack.append(visited.pop(0))
 
-    raise NotImplementedError
+    
+
+"""
+V1: False, V2: 0
+o1
+V1: True, V2: 0
+o2
+V1: True, V2: 1
+
+
+
+"""
+            
