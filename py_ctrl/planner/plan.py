@@ -45,6 +45,8 @@ def plan(state: State, goal: Guard, model: Model, max_depth: int = 20) -> Option
                             break
                         stack.append(model.operations[op].next_planning(i))
                         controled_stack.append(model.operations[op].next_planning(i))
+        if not order:
+            return None
 
                     ##print(i,":\t",stack)
                 #print(stack)
