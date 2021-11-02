@@ -23,10 +23,10 @@ def plan(state: State, goal: Guard, model: Model, max_depth: int = 20) -> Option
     In the runner, there is a mode to pre-start operations, but that should not be considered while planning
     """
     order=[]
-    newgoal=goal
+    goal
 
     
-    while newgoal!=state:
+    while not goal.eval(state):
         print(order)
         stack=[state]
         controled_stack=[state]
@@ -38,10 +38,10 @@ def plan(state: State, goal: Guard, model: Model, max_depth: int = 20) -> Option
                 for op in model.operations:
                     #print (model.operations[op].precondition.guard.eval(i),":\n",model.operations[op].precondition.guard,"\t\t",i)
                     if (model.operations[op].precondition.guard.eval(i) and model.operations[op].next_planning(i) not in controled_stack):
-                        #print("test    ",model.operations[op].next_planning(state))
-                        if model.operations[op].next_planning(i)==goal:
+                        #test=goal.eval(model.operations[op].next_planning(i))
+                        if goal.eval(model.operations[op].next_planning(i)):
                             order.insert(0,model.operations[op].name)
-                            newgoal=i
+                            goal=model.operations[op].precondition.guard
                             break
                         stack.append(model.operations[op].next_planning(i))
                         controled_stack.append(model.operations[op].next_planning(i))
@@ -49,7 +49,7 @@ def plan(state: State, goal: Guard, model: Model, max_depth: int = 20) -> Option
                     ##print(i,":\t",stack)
                 #print(stack)
                 #print("nytt test\n")
-
+    return order
 
         
 
