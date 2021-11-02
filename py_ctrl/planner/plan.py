@@ -22,23 +22,34 @@ def plan(state: State, goal: Guard, model: Model, max_depth: int = 20) -> Option
 
     In the runner, there is a mode to pre-start operations, but that should not be considered while planning
     """
-    stack=[state]
-    controled_stack=[state]
-    while stack and len(stack)<max_depth:
-        for i in stack:
-            print(stack)
-            stack.pop(0)
-            #print("\t",stack)
-            for op in model.operations:
-                print (model.operations[op].precondition.guard.eval(i),":\n",model.operations[op].precondition.guard,"\t\t",i)
-                if (model.operations[op].precondition.guard.eval(i) and model.operations[op].next_planning(i) not in controled_stack):
-                    #print("test    ",model.operations[op].next_planning(state))
-                    stack.append(model.operations[op].next_planning(i))
-                    controled_stack.append(model.operations[op].next_planning(i))
+    order=[]
+    newgoal=goal
 
-                ##print(i,":\t",stack)
-            print(stack)
-            print("nytt test\n")
+    
+    while newgoal!=state:
+        print(order)
+        stack=[state]
+        controled_stack=[state]
+        while stack and len(stack)<max_depth:
+            for i in stack:
+                #print(stack)
+                stack.pop(0)
+                #print("\t",stack)
+                for op in model.operations:
+                    #print (model.operations[op].precondition.guard.eval(i),":\n",model.operations[op].precondition.guard,"\t\t",i)
+                    if (model.operations[op].precondition.guard.eval(i) and model.operations[op].next_planning(i) not in controled_stack):
+                        #print("test    ",model.operations[op].next_planning(state))
+                        if model.operations[op].next_planning(i)==goal:
+                            order.insert(0,model.operations[op].name)
+                            newgoal=i
+                            break
+                        stack.append(model.operations[op].next_planning(i))
+                        controled_stack.append(model.operations[op].next_planning(i))
+
+                    ##print(i,":\t",stack)
+                #print(stack)
+                #print("nytt test\n")
+
 
         
 
