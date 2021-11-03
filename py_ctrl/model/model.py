@@ -115,6 +115,13 @@ def the_model() -> Model:
         postcondition=Transition("post", g(f"r1_act == pos3"), ()),
         effects=a(f"r1_act <- pos3")
     )
+    for i in [1,2,3]:
+        ops[f"r1_grip_pos{i}"] = Operation(
+            name=f"r1_grip_pos{i}", 
+            precondition=Transition("pre", g(f"(r1_ref == posb{i}"), a(f"r1_grip <- {True}")),
+            postcondition=Transition("post", g(f"r1_act == posb{i}"), a(f"posh1 <- posb{i} , posb{i} <- {None}")),
+            effects=a(f"r1_griping <- True")
+        )
 
 
     
@@ -147,13 +154,13 @@ def the_model() -> Model:
 
     # here is another example of two dummy operations showing that you can use an iterator to 
     # create multiple operations at the same time
-    for i in [1,2]:
+    """for i in [1,2]:
         ops[f"op{i}"] = Operation(
             name=f"op{i}", 
             precondition=Transition("pre", g(f"(!v{i}) && (dummy == hello)"), a(f"v{i}")),
             postcondition=Transition("post", AlwaysTrue(), a(f"dummy <- world")),
             effects=(),
-        )
+        )"""
         
     return Model(initial_state, ops)
 
