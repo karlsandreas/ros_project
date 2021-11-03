@@ -7,10 +7,11 @@ from model.operation import Operation, Transition
 from predicates.state import State
 from predicates.guards import Guard
 from predicates.actions import Action
-    
+"""   
 
 def plan(state: State, goal: Guard, model: Model, max_depth: int = 20) -> Optional[List[str]]:
-    """
+"""
+"""
     Find a sequence of operations to reach the goal from the given state or
     return None if you can not find a plan. Use max_depth to stop searching when you have more than
     max_depth steps in the path. 
@@ -21,7 +22,8 @@ def plan(state: State, goal: Guard, model: Model, max_depth: int = 20) -> Option
     number of operations to reach the goal, not the shortest time.
 
     In the runner, there is a mode to pre-start operations, but that should not be considered while planning
-    """
+"""
+"""
     order=[]
     goal
 
@@ -46,5 +48,43 @@ def plan(state: State, goal: Guard, model: Model, max_depth: int = 20) -> Option
             return None
 
     return order
+"""
+
+def plan(state: State, goal: Guard, model: Model, max_depth: int = 20) -> Optional[List[str]]:
+    stack = []
+    stack_and_op = [state,[]]
+    stack.append(stack_and_op) #stack is a nested list with state and operations to that state
+
+    visited = []
+    while stack:
+        current_state = stack.pop(0) 
+        if len(current_state[1])>max_depth:
+            print("number of operations =", len(current_state[1]))
+            return None
+        else:
+            state_copy = current_state.copy()
+            if goal.eval(state_copy[0]):
+                return state_copy[1]
+            
+            for op in model.operations:
+                
+                
+                next_state = model.operations[op].next_planning(state_copy[0])
+                
+                if model.operations[op].eval(state_copy[0]) and next_state not in visited:
+                    ops_copy = state_copy[1].copy()
+                    ops_copy.append(op)
+                    if goal.eval(next_state):
+                        return ops_copy  #return list of operations
+
+                    elif next_state not in stack:
+                        state_ops = [next_state,ops_copy]
+                        stack.append(state_ops)
+                    
+                state_copy = current_state.copy()
+            visited.append(current_state[0])
+    print("Number of visited ", len(visited))
+    print("Stack empty")
+    return None
 
 

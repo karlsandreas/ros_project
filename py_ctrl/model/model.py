@@ -46,8 +46,11 @@ def the_model() -> Model:
         posb1 = "red_cube",    
         posb2 = "blue_cube",
         posb3 = "green_cube",
-        block_in_r1 = None,     
-        block_in_r2 = None,
+        red = "pos1",
+        blue = "pos2",
+        green = "pos3",
+        block_in_r1 = "DummyVal",     
+        block_in_r2 = "DummyVal",
 
 
     )
@@ -72,7 +75,7 @@ def the_model() -> Model:
         # call next(state) on the precondition transition. This will set the command variable r1_ref
         # to home so that the robot will go home. You can also add more actions here if for example
         # you need to block other operation to pre-start. You will read more about pre-start in the assignment
-        precondition=Transition("pre", g(f"(r1_ref != home)"), a(f"r1_ref <- home")),
+        precondition=Transition("pre", g(f"(r1_ref != home) && r1_gripping == True"), a(f"r1_ref <- home")),
 
         # the postcondition defines when the operation has completed by checking the measured variables. This 
         # will not be possible when we are planning, since we do not have the real system then, so when
@@ -89,7 +92,7 @@ def the_model() -> Model:
 
     ops[f"r2_to_home"] = Operation(
         name=f"r2_to_home", 
-        precondition=Transition("pre", g(f"(r2_ref != home)"), a(f"r2_ref <- home")),
+        precondition=Transition("pre", g(f"(r2_ref != home) && r2_gripping == True"), a(f"r2_ref <- home")),
         postcondition=Transition("post", g(f"r2_act == home"), ()),
         effects=a(f"r2_act <- home")
     )
@@ -111,30 +114,29 @@ def the_model() -> Model:
         for j in [1,2,3]:
             ops[f"r{i}_to_pos{j}"] = Operation(
                 name=f"r{i}_to_pos{j}", 
-                precondition=Transition("pre", g(f"r{i}_ref != pos{j} && r{3-i}_ref != pos{j}"), a(f"r{i}_ref <- pos{j}")),
+                precondition=Transition("pre", g(f"r{i}_ref != pos{j} && r{3-i}_ref != pos{j} && ((r{i}_gripping == True && posb{j} == None) || (r{i}_gripping == False && posb{j} != None))"), a(f"r{i}_ref <- pos{j}, block_in_r{i} <- None")),
                 postcondition=Transition("post", g(f"r{i}_act == pos{j}"), ()),
                 effects=a(f"r{i}_act <- pos{j}"),
             )
 
 
     #Operations for gripping with r1 and r2 at pos 1,2,3
-    blocks = ["red_cube","blue_cube","green_cube"]
     for i in [1,2]:
         for j in [1,2,3]:
             ops[f"r{i}_grip_pos{j}"] = Operation(
                 name=f"r{i}_grip_pos{j}", 
-                precondition=Transition("pre", g(f"r{i}_ref == pos{j}"), a(f"r{i}_grip <- True")),
+                precondition=Transition("pre", g(f"r{i}_ref == pos{j} && r{3-i}_ref != pos{j} && block_in_r{i} == None && r{i}_gripping == False && posb{j} != None"), a(f"r{i}_grip <- True")),
                 postcondition=Transition("post", g(f"r{i}_act == pos{j} && r{i}_gripping == True"), a(f"block_in_r{i} <- posb{j}, posb{j} <- None")),
-                effects=a(f"r1_gripping <- True")
+                effects=a(f"r{i}_gripping <- True")
             )
     #Operations for dropping with r1 and r2 at pos 1,2,3
     for i in [1,2]:
         for j in [1,2,3]:
             ops[f"r{i}_drop_pos{j}"] = Operation(
                 name=f"r{i}_drop_pos{j}", 
-                precondition=Transition("pre", g(f"r{i}_ref == pos{j}"), a(f"r{i}_grip <- False")),
+                precondition=Transition("pre", g(f"r{i}_ref == pos{j} && r{3-i}_ref != pos{j} && r{i}_gripping == True && block_in_r{i} == True && posb{j} == None"), a(f"r{i}_grip <- False")),
                 postcondition=Transition("post", g(f"r{i}_act == pos{j}"), a(f"posb{j} <- block_in_r{i}, block_in_r{i} <- None")),
-                effects=a(f"r1_gripping <- False")
+                effects=a(f"r{i}_gripping <- False")
             )
                 
     return Model(initial_state, ops)
