@@ -4,8 +4,12 @@ from model.operation import Operation, Transition
 from predicates.state import State
 import predicates.guards
 import predicates.actions
-from predicates.guards import AlwaysFalse, AlwaysTrue, Guard
+from predicates.guards import AlwaysFalse, AlwaysTrue, Guard, guards
 from handlers_msgs.msg import CubeState
+from rosidl_parser.definition import NONEXPLICIT_INTEGER_TYPES
+
+g=predicates.guards.from_str
+a=predicates.actions.from_str
 
 @dataclass
 class Model(object):
@@ -42,7 +46,13 @@ def the_model() -> Model:
         r2_act = "home",            #{home, pos1, pos2, pos3}
         r2_gripping = False,
 
-        # estimated below
+        #estimated below
+        posb1 = "red_cube",
+        posb2 = "blue_cube",
+        posb3 = "green_cube",
+        posh1 = None,
+        posh2 = None,
+        
         v1 = False,  # example that you can remove later
         v2 = False,   # example that you can remove later
         dummy = "hello",   # example that you can remove later
@@ -89,9 +99,48 @@ def the_model() -> Model:
     # a cube and there is a cube in pos1
     ops[f"r1_to_pos1"] = Operation(
         name=f"r1_to_pos1", 
-        precondition=Transition("pre", g(f"(r1_ref != pos1)"), a(f"r1_ref <- pos1")),
+        precondition=Transition("pre", g(f"(r1_ref != pos1 && r2_ref != pos1)"), a(f"r1_ref <- pos1")),
         postcondition=Transition("post", g(f"r1_act == pos1"), ()),
         effects=a(f"r1_act <- pos1")
+    )
+    ops[f"r1_to_pos2"] = Operation(
+        name=f"r1_to_pos2", 
+        precondition=Transition("pre", g(f"(r1_ref != pos2 && r2_ref != pos2)"), a(f"r1_ref <- pos2")),
+        postcondition=Transition("post", g(f"r1_act == pos2"), ()),
+        effects=a(f"r1_act <- pos2")
+    )
+    ops[f"r1_to_pos3"] = Operation(
+        name=f"r1_to_pos3", 
+        precondition=Transition("pre", g(f"(r1_ref != pos3 && r2_ref != pos3)"), a(f"r1_ref <- pos3")),
+        postcondition=Transition("post", g(f"r1_act == pos3"), ()),
+        effects=a(f"r1_act <- pos3")
+    )
+
+
+    
+    ops[f"r2_to_home"] = Operation(
+        name=f"r2_to_home", 
+        precondition=Transition("pre", g(f"(r2_ref != home)"), a(f"r2_ref <- home")),
+        postcondition=Transition("post", g(f"r2_act == home"), ()),
+        effects=a(f"r2_act <- home")
+    )
+    ops[f"r2_to_pos1"] = Operation(
+        name=f"r2_to_pos1", 
+        precondition=Transition("pre", g(f"(r2_ref != pos1 && r1_ref != pos1)"), a(f"r2_ref <- pos1")),
+        postcondition=Transition("post", g(f"r2_act == pos1"), ()),
+        effects=a(f"r2_act <- pos1")
+    )
+    ops[f"r2_to_pos2"] = Operation(
+        name=f"r2_to_pos2", 
+        precondition=Transition("pre", g(f"(r2_ref != pos2 && r1_ref != pos2)"), a(f"r2_ref <- pos2")),
+        postcondition=Transition("post", g(f"r2_act == pos2"), ()),
+        effects=a(f"r2_act <- pos2")
+    )
+    ops[f"r2_to_pos3"] = Operation(
+        name=f"r2_to_pos3", 
+        precondition=Transition("pre", g(f"(r2_ref != pos3 && r1_ref != pos3)"), a(f"r2_ref <- pos3")),
+        postcondition=Transition("post", g(f"r2_act == pos3"), ()),
+        effects=a(f"r1_act <- pos3")
     )
 
 
@@ -124,11 +173,18 @@ def from_goal_to_goal(cube_goal: CubeState) -> Guard:
     pos2: str = cube_goal.pos2
     pos3: str = cube_goal.pos3
 
+    #print (pos1)
+    #print (pos2)
+    #print (pos3)
+
+    goal=g(f"posb1 == {pos1} && posb2 == {pos2} && posb3 == {pos3}")
+
+
     # update this goal by converting the cubestate to a goal that you model understands
     # you will have some kind of estimated variables keeping track of where the cubes are
     # and these estimated variables should have the correct color. use the guards from_string parser
     # to simplify this and the g(f"v1 == {pos1} && v2 == {pos2}") notation
-    goal = AlwaysFalse()
+    #goal = AlwaysFalse()
     return goal
 
 

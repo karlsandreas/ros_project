@@ -66,7 +66,7 @@ def test_simple_planner_1():
         o5.name: o5,
     })
 
-    goal = g("v2 == 5")
+    goal = g("v2 == 3")
     p = plan(initial_state, goal, simple_model)
     assert p != None
     assert len(p) != 0
