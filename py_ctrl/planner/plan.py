@@ -25,9 +25,7 @@ def plan(state: State, goal: Guard, model: Model, max_depth: int = 20) -> Option
     order=[]
     goal
 
-    
     while not goal.eval(state):
-        print(order)
         stack=[state]
         controled_stack=[state]
         while stack and len(stack)<max_depth:
@@ -46,7 +44,7 @@ def plan(state: State, goal: Guard, model: Model, max_depth: int = 20) -> Option
                         controled_stack.append(model.operations[op].next_planning(i))
         if not order:
             return None
-            
+
     return order
 
 

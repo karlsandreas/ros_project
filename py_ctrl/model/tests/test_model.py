@@ -252,6 +252,15 @@ def test_r2_to_all_pos():
     assert guards.Eq("r2_act", "home").eval(at_home)
 # Write your own tests to check the all the operations 
 
+def switch_pos1_pos2():
+    m = the_model()
+    s = m.initial_state
+    grip_at_pos1 = m.operations["r1_grip_pos1"].next_planning(s)
+    grip_at_pos2 = m.operations["r2_grip_pos2"].next_planning(s)
+    drop_at_pos1 = m.operations["r1_drop_pos2"].next_planning(s)
+    drop_at_pos2 = m.operations["r2_drop_pos1"].next_planning(s)
+    print(grip_at_pos1)
+
 def test_goal_to_goal():
     # you need to implement the translation from the goal message to your way of tracking the cubes
     cube_goal = CubeState()

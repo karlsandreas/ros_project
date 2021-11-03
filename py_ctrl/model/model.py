@@ -42,17 +42,14 @@ def the_model() -> Model:
         r2_act = "home",            #{home, pos1, pos2, pos3}
         r2_gripping = False,
 
-        #
-        pos1 = "red_cube",
-        pos2 = "blue_cube",
-        pos3 = "green_cube",
-        posh1 = None,
-        posh2 = None,
+        #estimators for cube in each position
+        posb1 = "red_cube",    
+        posb2 = "blue_cube",
+        posb3 = "green_cube",
+        block_in_r1 = None,     
+        block_in_r2 = None,
 
-        # estimated below
-        v1 = False,  # example that you can remove later
-        v2 = False,   # example that you can remove later
-        dummy = "hello",   # example that you can remove later
+
     )
 
     # we will store all operations in this dict that will be part of the model
@@ -98,6 +95,7 @@ def the_model() -> Model:
     )
 
 
+
     # no you can add all the other operations that you need to make the robots to move between the positions
     # and to pick and place the cubes. i have added one more so that the robots move when running, but you need 
     # to modify this one since the robot is not allowed to move to pos1 if the other robot is there or if carries 
@@ -107,6 +105,8 @@ def the_model() -> Model:
 
     # here is another example of two dummy operations showing that you can use an iterator to 
     # create multiple operations at the same time
+
+    #Operations for moving r1 and r2 arm to pos 1,2,3
     for i in [1,2]:
         for j in [1,2,3]:
             ops[f"r{i}_to_pos{j}"] = Operation(
@@ -115,7 +115,28 @@ def the_model() -> Model:
                 postcondition=Transition("post", g(f"r{i}_act == pos{j}"), ()),
                 effects=a(f"r{i}_act <- pos{j}"),
             )
-            
+
+
+    #Operations for gripping with r1 and r2 at pos 1,2,3
+    blocks = ["red_cube","blue_cube","green_cube"]
+    for i in [1,2]:
+        for j in [1,2,3]:
+            ops[f"r{i}_grip_pos{j}"] = Operation(
+                name=f"r{i}_grip_pos{j}", 
+                precondition=Transition("pre", g(f"r{i}_ref == pos{j}"), a(f"r{i}_grip <- True")),
+                postcondition=Transition("post", g(f"r{i}_act == pos{j} && r{i}_gripping == True"), a(f"block_in_r{i} <- posb{j}, posb{j} <- None")),
+                effects=a(f"r1_gripping <- True")
+            )
+    #Operations for dropping with r1 and r2 at pos 1,2,3
+    for i in [1,2]:
+        for j in [1,2,3]:
+            ops[f"r{i}_drop_pos{j}"] = Operation(
+                name=f"r{i}_drop_pos{j}", 
+                precondition=Transition("pre", g(f"r{i}_ref == pos{j}"), a(f"r{i}_grip <- False")),
+                postcondition=Transition("post", g(f"r{i}_act == pos{j}"), a(f"posb{j} <- block_in_r{i}, block_in_r{i} <- None")),
+                effects=a(f"r1_gripping <- False")
+            )
+                
     return Model(initial_state, ops)
 
 
@@ -144,7 +165,7 @@ def from_goal_to_goal(cube_goal: CubeState) -> Guard:
     # and these estimated variables should have the correct color. use the guards from_string parser
     # to simplify this and the g(f"v1 == {pos1} && v2 == {pos2}") notation
 
-    goal=g(f"pos1 == {pos1} && pos2 == {pos2} && pos3 == {pos3}")
+    goal=g(f"posb1 == {pos1} && posb2 == {pos2} && posb3 == {pos3}")
     
     return goal
 
