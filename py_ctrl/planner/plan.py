@@ -32,13 +32,12 @@ def plan(state: State, goal: Guard, model: Model, max_depth: int = 20) -> Option
         controled_stack=[state]
         while stack and len(stack)<max_depth:
             for i in stack:
-                #print(stack)
+                
                 stack.pop(0)
-                #print("\t",stack)
+                
                 for op in model.operations:
-                    #print (model.operations[op].precondition.guard.eval(i),":\n",model.operations[op].precondition.guard,"\t\t",i)
-                    if (model.operations[op].precondition.guard.eval(i) and model.operations[op].next_planning(i) not in controled_stack):
-                        #test=goal.eval(model.operations[op].next_planning(i))
+                    if (model.operations[op].eval(i) and model.operations[op].next_planning(i) not in controled_stack):
+                        
                         if goal.eval(model.operations[op].next_planning(i)):
                             order.insert(0,model.operations[op].name)
                             goal=model.operations[op].precondition.guard
@@ -47,10 +46,7 @@ def plan(state: State, goal: Guard, model: Model, max_depth: int = 20) -> Option
                         controled_stack.append(model.operations[op].next_planning(i))
         if not order:
             return None
-
-                    ##print(i,":\t",stack)
-                #print(stack)
-                #print("nytt test\n")
+            
     return order
 
 

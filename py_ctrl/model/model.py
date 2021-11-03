@@ -42,6 +42,13 @@ def the_model() -> Model:
         r2_act = "home",            #{home, pos1, pos2, pos3}
         r2_gripping = False,
 
+        #
+        pos1 = "red_cube",
+        pos2 = "blue_cube",
+        pos3 = "green_cube",
+        posh1 = None,
+        posh2 = None,
+
         # estimated below
         v1 = False,  # example that you can remove later
         v2 = False,   # example that you can remove later
@@ -83,29 +90,32 @@ def the_model() -> Model:
         effects=a(f"r1_act <- home")
     )
 
+    ops[f"r2_to_home"] = Operation(
+        name=f"r2_to_home", 
+        precondition=Transition("pre", g(f"(r2_ref != home)"), a(f"r2_ref <- home")),
+        postcondition=Transition("post", g(f"r2_act == home"), ()),
+        effects=a(f"r2_act <- home")
+    )
+
+
     # no you can add all the other operations that you need to make the robots to move between the positions
     # and to pick and place the cubes. i have added one more so that the robots move when running, but you need 
     # to modify this one since the robot is not allowed to move to pos1 if the other robot is there or if carries 
     # a cube and there is a cube in pos1
-    ops[f"r1_to_pos1"] = Operation(
-        name=f"r1_to_pos1", 
-        precondition=Transition("pre", g(f"(r1_ref != pos1)"), a(f"r1_ref <- pos1")),
-        postcondition=Transition("post", g(f"r1_act == pos1"), ()),
-        effects=a(f"r1_act <- pos1")
-    )
 
 
 
     # here is another example of two dummy operations showing that you can use an iterator to 
     # create multiple operations at the same time
     for i in [1,2]:
-        ops[f"op{i}"] = Operation(
-            name=f"op{i}", 
-            precondition=Transition("pre", g(f"(!v{i}) && (dummy == hello)"), a(f"v{i}")),
-            postcondition=Transition("post", AlwaysTrue(), a(f"dummy <- world")),
-            effects=(),
-        )
-        
+        for j in [1,2,3]:
+            ops[f"r{i}_to_pos{j}"] = Operation(
+                name=f"r{i}_to_pos{j}", 
+                precondition=Transition("pre", g(f"r{i}_ref != pos{j} && r{3-i}_ref != pos{j}"), a(f"r{i}_ref <- pos{j}")),
+                postcondition=Transition("post", g(f"r{i}_act == pos{j}"), ()),
+                effects=a(f"r{i}_act <- pos{j}"),
+            )
+            
     return Model(initial_state, ops)
 
 
@@ -124,11 +134,18 @@ def from_goal_to_goal(cube_goal: CubeState) -> Guard:
     pos2: str = cube_goal.pos2
     pos3: str = cube_goal.pos3
 
+    #Cubes starting pos
+    #red: pos1
+    #blue: pos2
+    #green: pos3
+
     # update this goal by converting the cubestate to a goal that you model understands
     # you will have some kind of estimated variables keeping track of where the cubes are
     # and these estimated variables should have the correct color. use the guards from_string parser
     # to simplify this and the g(f"v1 == {pos1} && v2 == {pos2}") notation
-    goal = AlwaysFalse()
+
+    goal=g(f"pos1 == {pos1} && pos2 == {pos2} && pos3 == {pos3}")
+    
     return goal
 
 
