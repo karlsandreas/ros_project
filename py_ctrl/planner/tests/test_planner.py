@@ -177,7 +177,7 @@ def test_planner_real_model_1():
 def test_planner_real_model_full():
     m = the_model()
     # write a goal so that the cubes are at different positions than the inital ones
-    goal = g("posb2 == red_cube")
+    goal = g("posb1 == blue_cube && posb2 == red_cube")
     p = plan(m.initial_state, goal, m, 15000)
     assert p != None
     print(p)  

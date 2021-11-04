@@ -68,11 +68,12 @@ def plan(state: State, goal: Guard, model: Model, max_depth: int = 20) -> Option
                 return state_copy[1]
             
             for op in model.operations:
-                
+   
                 
                 next_state = model.operations[op].next_planning(state_copy[0])
-                
+                model.operations[op].precondition.guard.eval(state_copy[0])
                 if model.operations[op].eval(state_copy[0]) and next_state not in visited:
+
                     ops_copy = state_copy[1].copy()
                     ops_copy.append(op)
                     if goal.eval(next_state):
