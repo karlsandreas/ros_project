@@ -7,7 +7,7 @@ from model.operation import Operation, Transition
 from predicates.state import State
 from predicates.guards import Guard
 from predicates.actions import Action
-"""   
+""" 
 
 def plan(state: State, goal: Guard, model: Model, max_depth: int = 20) -> Optional[List[str]]:
 """
@@ -48,6 +48,7 @@ def plan(state: State, goal: Guard, model: Model, max_depth: int = 20) -> Option
             return None
 
     return order
+
 """
 
 def plan(state: State, goal: Guard, model: Model, max_depth: int = 20) -> Optional[List[str]]:
@@ -86,5 +87,3 @@ def plan(state: State, goal: Guard, model: Model, max_depth: int = 20) -> Option
     print("Number of visited ", len(visited))
     print("Stack empty")
     return None
-
-
