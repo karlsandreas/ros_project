@@ -47,11 +47,11 @@ def the_model() -> Model:
         r2_gripping = False,
 
         #estimated below
-        posb1 = "red_cube",
+        posb1 = "red_cube",    
         posb2 = "blue_cube",
         posb3 = "green_cube",
-        posh1 = None,
-        posh2 = None,
+        block_in_r1 = "None",     
+        block_in_r2 = "None",
         
         v1 = False,  # example that you can remove later
         v2 = False,   # example that you can remove later

@@ -37,7 +37,7 @@ def plan(state: State, goal: Guard, model: Model, max_depth: int = 20) -> Option
                 #print("\t",stack)
                 for op in model.operations:
                     #print (model.operations[op].precondition.guard.eval(i),":\n",model.operations[op].precondition.guard,"\t\t",i)
-                    if (model.operations[op].precondition.guard.eval(i) and model.operations[op].next_planning(i) not in controled_stack):
+                    if (model.operations[op].precondition.guard.eval(i) and model.operations[op].next_planning(i) not in controled_stack and model.operations[op].next_planning(i) not in stack):
                         #test=goal.eval(model.operations[op].next_planning(i))
                         if goal.eval(model.operations[op].next_planning(i)):
                             order.insert(0,model.operations[op].name)
