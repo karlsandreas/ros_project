@@ -118,7 +118,7 @@ def the_model() -> Model:
     for i in [1,2,3]:
         ops[f"r1_grip_pos{i}"] = Operation(
             name=f"r1_grip_pos{i}", 
-            precondition=Transition("pre", g(f"(r1_ref == posb{i}"), a(f"r1_grip <- {True}")),
+            precondition=Transition("pre", g(f"r1_ref == posb{i}"), a(f"r1_grip <- {True}")),
             postcondition=Transition("post", g(f"r1_act == posb{i}"), a(f"posh1 <- posb{i} , posb{i} <- {None}")),
             effects=a(f"r1_griping <- True")
         )
