@@ -158,10 +158,12 @@ def test_planner_real_model_1():
     assert plan(m.initial_state, goal, m) == []
     
     
-    goal = g("r1_act == pos1")
+    goal = g("r2_act == pos2")
     # This plan should only include one operation. Change the dummy name below to 
     # the name of the operation that you are using
-    assert plan(m.initial_state, goal, m) == ["r1_to_pos1"]
+    p = plan(m.initial_state, goal, m)
+    print(p)
+    assert p == ["r2_to_pos2"]
     
     goal = g("r1_act == foo")
     # Your planner should not find any path, but it will take a long time
@@ -175,7 +177,7 @@ def test_planner_real_model_1():
 def test_planner_real_model_full():
     m = the_model()
     # write a goal so that the cubes are at different positions than the inital ones
-    goal = g("r1_gripping == True")
+    goal = g("posb1 == empty && posb2 == empty")
     p = plan(m.initial_state, goal, m, 15000)
     assert p != None
     print(p)  
@@ -190,4 +192,5 @@ def test_planner_real_model_full():
         
     ])
     assert set(p) == should_find
+
 

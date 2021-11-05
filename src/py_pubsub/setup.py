@@ -13,10 +13,10 @@ setup(
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='max',
-    maintainer_email='91460338+MalteMannen401@users.noreply.github.com',
-    description='TODO: Package description',
-    license='TODO: License declaration',
+    maintainer='root',
+    maintainer_email='andreask413@gmail.com',
+    description='Publisher/subscriber',
+    license='Apache License 2.0',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [

@@ -194,9 +194,11 @@ def test_some_operations():
 """
 def test_r1_to_all_pos():
     positions = [2,3]
+
     for i in positions:
         m = the_model()
         ops = m.operations
+
         test_state = m.initial_state.next(r1_ref = f"pos{3-i}", r1_act = f"pos{i}")
         o = ops[f"r1_to_pos{i}"]
         
@@ -215,6 +217,7 @@ def test_r1_to_all_pos():
         elif i == 3:
             assert after_start == test_state.next(r1_ref = f"pos{i}", r1_to_pos3 = "e")
             assert after_completed == after_start.next(r1_act = f"pos{i}", r1_to_pos3 = "i")
+
         assert not not_completed
         assert completed
         
