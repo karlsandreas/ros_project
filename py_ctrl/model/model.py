@@ -31,15 +31,15 @@ def the_model() -> Model:
     
     initial_state = State(
         # control variables
-        r1_ref = "home",            #{home, pos1, pos2, pos3}
+        r1_ref = "pos1",            #{home, pos1, pos2, pos3}
         r1_grip = False,
-        r2_ref = "home",            #{home, pos1, pos2, pos3}
+        r2_ref = "pos2",            #{home, pos1, pos2, pos3}
         r2_grip = False,
 
         # measured variables
-        r1_act = "home",            #{home, pos1, pos2, pos3}
+        r1_act = "pos1",            #{home, pos1, pos2, pos3}
         r1_gripping = False,
-        r2_act = "home",            #{home, pos1, pos2, pos3}
+        r2_act = "pos2",            #{home, pos1, pos2, pos3}
         r2_gripping = False,
 
         #estimators for cube in each position
