@@ -121,20 +121,22 @@ def the_model() -> Model:
     #Operations for gripping with r1 and r2 at pos 1,2,3
     for i in [1,2]:
         for j in [1,2,3]:
+            temp=initial_state.get(f"posb{j}")
             ops[f"r{i}_grip_pos{j}"] = Operation(
                 name=f"r{i}_grip_pos{j}", 
                 precondition=Transition("pre", g(f"r{i}_ref == pos{j} && r{3-i}_ref != pos{j} && r{i}_gripping == False"), a(f"r{i}_grip <- True")),
                 postcondition=Transition("post", g(f"r{i}_gripping == True"), a(f"block_in_r{i} <- posb{j}, posb{j} <- empty")),
-                effects=a(f"r{i}_gripping <- True , block_in_r{i} <- posb{j}, posb{j} <- empty")
+                effects=a(f"r{i}_gripping <- True , block_in_r{i} <- {temp}, posb{j} <- empty")
             )
     #Operations for dropping with r1 and r2 at pos 1,2,3
     for i in [1,2]:
         for j in [1,2,3]:
+            temp=initial_state.get(f"block_in_r{i}")
             ops[f"r{i}_drop_pos{j}"] = Operation(
                 name=f"r{i}_drop_pos{j}", 
                 precondition=Transition("pre", g(f"r{i}_ref == pos{j} && r{i}_gripping == True && posb{j} == empty"), a(f"r{i}_grip <- False")),
                 postcondition=Transition("post", g(f"r{i}_grip == False "), a(f"posb{j} <- block_in_r{i}, block_in_r{i} <- empty")),
-                effects=a(f"r{i}_gripping <- False , posb{j} <- block_in_r{i}, block_in_r{i} <- empty")
+                effects=a(f"r{i}_gripping <- False , posb{j} <- {temp}, block_in_r{i} <- empty")
             )
                 
     return Model(initial_state, ops)
