@@ -28,27 +28,27 @@ def the_model() -> Model:
     Observe: The name of a variable can not be the same as any value since we have the variable_or_value strings. 
     The initial state of the cubes are: poses = {"pos1": "red_cube", "pos2": "blue_cube", "pos3": "green_cube"}
     """
-    
+    poses = {}
     initial_state = State(
         # control variables
         r1_ref = "pos1",            #{home, pos1, pos2, pos3}
-        r1_grip = False,
+        r1_grip = True,
         r2_ref = "pos2",            #{home, pos1, pos2, pos3}
         r2_grip = False,
 
         # measured variables
         r1_act = "pos1",            #{home, pos1, pos2, pos3}
-        r1_gripping = False,
+        r1_gripping = True,
         r2_act = "pos2",            #{home, pos1, pos2, pos3}
         r2_gripping = False,
 
         #estimators for cube in each position
-        posb1 = "red_cube",    
+        posb1 = "empty",    
         posb2 = "blue_cube",
         posb3 = "green_cube",
-        block_in_r1 = "empty",     
+        block_in_r1 = "red_cube",     
         block_in_r2 = "empty",
-
+        poses = {"pos1": "red_cube", "pos2": "blue_cube", "pos3": "green_cube"}
 
 
     )
@@ -121,10 +121,11 @@ def the_model() -> Model:
     #Operations for gripping with r1 and r2 at pos 1,2,3
     for i in [1,2]:
         for j in [1,2,3]:
+            c_pos = poses[f"pos{j}"]
             ops[f"r{i}_grip_pos{j}"] = Operation(
                 name=f"r{i}_grip_pos{j}", 
                 precondition=Transition("pre", g(f"r{i}_ref == pos{j} && r{3-i}_ref != pos{j} && r{i}_gripping == False"), a(f"r{i}_grip <- True")),
-                postcondition=Transition("post", g(f"r{i}_gripping == True"), a(f"block_in_r{i} <- posb{j}, posb{j} <- empty")),
+                postcondition=Transition("post", g(f"r{i}_gripping == True"), a(f"block_in_r{i} <- {c_pos}, posb{j} <- empty")),
                 effects=a(f"r{i}_gripping <- True , block_in_r{i} <- posb{j}, posb{j} <- empty")
             )
     #Operations for dropping with r1 and r2 at pos 1,2,3
