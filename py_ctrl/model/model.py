@@ -28,28 +28,26 @@ def the_model() -> Model:
     Observe: The name of a variable can not be the same as any value since we have the variable_or_value strings. 
     The initial state of the cubes are: poses = {"pos1": "red_cube", "pos2": "blue_cube", "pos3": "green_cube"}
     """
-    poses = {}
     initial_state = State(
         # control variables
-        r1_ref = "pos1",            #{home, pos1, pos2, pos3}
-        r1_grip = True,
-        r2_ref = "pos2",            #{home, pos1, pos2, pos3}
+
+        r1_ref = "home",            #{home, pos1, pos2, pos3}
+        r1_grip = False,
+        r2_ref = "home",            #{home, pos1, pos2, pos3}
         r2_grip = False,
 
         # measured variables
-        r1_act = "pos1",            #{home, pos1, pos2, pos3}
-        r1_gripping = True,
-        r2_act = "pos2",            #{home, pos1, pos2, pos3}
+        r1_act = "home",            #{home, pos1, pos2, pos3}
+        r1_gripping = False,
+        r2_act = "home",            #{home, pos1, pos2, pos3}
         r2_gripping = False,
 
         #estimators for cube in each position
-        posb1 = "empty",    
+        posb1 = "red_cube",    # 1 is red, 2 is blue, 3 is green
         posb2 = "blue_cube",
         posb3 = "green_cube",
-        block_in_r1 = "red_cube",     
+        block_in_r1 = "empty",     
         block_in_r2 = "empty",
-        poses = {"pos1": "red_cube", "pos2": "blue_cube", "pos3": "green_cube"}
-
 
     )
 
@@ -73,7 +71,7 @@ def the_model() -> Model:
         # call next(state) on the precondition transition. This will set the command variable r1_ref
         # to home so that the robot will go home. You can also add more actions here if for example
         # you need to block other operation to pre-start. You will read more about pre-start in the assignment
-        precondition=Transition("pre", g(f"(r1_ref != home)"), a(f"r1_ref <- home")),
+        precondition=Transition("pre", g(f"(r1_ref != home && r1_gripping == True)"), a(f"r1_ref <- home")),
 
         # the postcondition defines when the operation has completed by checking the measured variables. This 
         # will not be possible when we are planning, since we do not have the real system then, so when
@@ -90,7 +88,7 @@ def the_model() -> Model:
 
     ops[f"r2_to_home"] = Operation(
         name=f"r2_to_home", 
-        precondition=Transition("pre", g(f"(r2_ref != home)"), a(f"r2_ref <- home")),
+        precondition=Transition("pre", g(f"(r2_ref != home && r1_gripping == True)"), a(f"r2_ref <- home")),
         postcondition=Transition("post", g(f"r2_act == home"), ()),
         effects=a(f"r2_act <- home")
     )
@@ -125,8 +123,9 @@ def the_model() -> Model:
             ops[f"r{i}_grip_pos{j}"] = Operation(
                 name=f"r{i}_grip_pos{j}", 
                 precondition=Transition("pre", g(f"r{i}_ref == pos{j} && r{3-i}_ref != pos{j} && r{i}_gripping == False"), a(f"r{i}_grip <- True")),
-                postcondition=Transition("post", g(f"r{i}_gripping == True"), a(f"block_in_r{i} <- posb{j}, posb{j} <- empty")),
-                effects=a(f"r{i}_gripping <- True , block_in_r{i} <- {temp}, posb{j} <- empty")
+
+                postcondition=Transition("post", g(f"r{i}_gripping == True"), a(f"block_in_r{i} = posb{j}, posb{j} = empty")),
+                effects=a(f"r{i}_gripping = True")
             )
     #Operations for dropping with r1 and r2 at pos 1,2,3
     for i in [1,2]:
@@ -135,8 +134,8 @@ def the_model() -> Model:
             ops[f"r{i}_drop_pos{j}"] = Operation(
                 name=f"r{i}_drop_pos{j}", 
                 precondition=Transition("pre", g(f"r{i}_ref == pos{j} && r{i}_gripping == True && posb{j} == empty"), a(f"r{i}_grip <- False")),
-                postcondition=Transition("post", g(f"r{i}_grip == False "), a(f"posb{j} <- block_in_r{i}, block_in_r{i} <- empty")),
-                effects=a(f"r{i}_gripping <- False , posb{j} <- {temp}, block_in_r{i} <- empty")
+                postcondition=Transition("post", g(f"r{i}_grip == False"), a(f"posb{j} = block_in_r{i}, block_in_r{i} = empty")),
+                effects=a(f"r{i}_gripping = False")
             )
                 
     return Model(initial_state, ops)
@@ -156,11 +155,6 @@ def from_goal_to_goal(cube_goal: CubeState) -> Guard:
     pos1: str = cube_goal.pos1
     pos2: str = cube_goal.pos2
     pos3: str = cube_goal.pos3
-
-    #Cubes starting pos
-    #red: pos1
-    #blue: pos2
-    #green: pos3
 
     # update this goal by converting the cubestate to a goal that you model understands
     # you will have some kind of estimated variables keeping track of where the cubes are
