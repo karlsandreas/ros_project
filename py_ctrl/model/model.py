@@ -73,7 +73,7 @@ def the_model() -> Model:
         # call next(state) on the precondition transition. This will set the command variable r1_ref
         # to home so that the robot will go home. You can also add more actions here if for example
         # you need to block other operation to pre-start. You will read more about pre-start in the assignment
-        precondition=Transition("pre", g(f"(r1_ref != home)"), a(f"r1_ref <- home")),
+        precondition=Transition("pre", g(f"(r1_ref != home && r1_gripping == True)"), a(f"r1_ref <- home")),
 
         # the postcondition defines when the operation has completed by checking the measured variables. This 
         # will not be possible when we are planning, since we do not have the real system then, so when
@@ -90,7 +90,7 @@ def the_model() -> Model:
 
     ops[f"r2_to_home"] = Operation(
         name=f"r2_to_home", 
-        precondition=Transition("pre", g(f"(r2_ref != home)"), a(f"r2_ref <- home")),
+        precondition=Transition("pre", g(f"(r2_ref != home && r1_gripping == True)"), a(f"r2_ref <- home")),
         postcondition=Transition("post", g(f"r2_act == home"), ()),
         effects=a(f"r2_act <- home")
     )
