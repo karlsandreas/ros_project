@@ -31,21 +31,21 @@ def the_model() -> Model:
     poses = {}
     initial_state = State(
         # control variables
-        r1_ref = "pos1",            #{home, pos1, pos2, pos3}
+        r1_ref = "home",            #{home, pos1, pos2, pos3}
         r1_grip = False,
-        r2_ref = "pos2",            #{home, pos1, pos2, pos3}
+        r2_ref = "home",            #{home, pos1, pos2, pos3}
         r2_grip = False,
 
         # measured variables
-        r1_act = "pos1",            #{home, pos1, pos2, pos3}
+        r1_act = "home",            #{home, pos1, pos2, pos3}
         r1_gripping = False,
-        r2_act = "pos2",            #{home, pos1, pos2, pos3}
+        r2_act = "home",            #{home, pos1, pos2, pos3}
         r2_gripping = False,
 
         #estimators for cube in each position
-        posb1 = "1",    # 1 is red, 2 is blue, 3 is green
-        posb2 = "2",
-        posb3 = "3",
+        posb1 = "red_cube",    # 1 is red, 2 is blue, 3 is green
+        posb2 = "blue_cube",
+        posb3 = "green_cube",
         block_in_r1 = "empty",     
         block_in_r2 = "empty",
 
@@ -112,7 +112,7 @@ def the_model() -> Model:
         for j in [1,2,3]:
             ops[f"r{i}_to_pos{j}"] = Operation(
                 name=f"r{i}_to_pos{j}", 
-                precondition=Transition("pre", g(f"r{i}_ref != pos{j} && r{3-i}_ref != pos{j} && ((r{i}_gripping == True && posb{j} == empty) || (r{i}_gripping == False && posb{j} != empty))"), a(f"r{i}_act <- pos{j}")),
+                precondition=Transition("pre", g(f"r{i}_ref != pos{j} && r{3-i}_ref != pos{j} && ((r{i}_gripping == True && posb{j} == empty) || (r{i}_gripping == False && posb{j} != empty))"), a(f"r{i}_ref <- pos{j}")),
                 postcondition=Transition("post", g(f"r{i}_act == pos{j}"), ()),
                 effects=a(f"r{i}_act <- pos{j}"),
             )
@@ -124,8 +124,8 @@ def the_model() -> Model:
             ops[f"r{i}_grip_pos{j}"] = Operation(
                 name=f"r{i}_grip_pos{j}", 
                 precondition=Transition("pre", g(f"r{i}_ref == pos{j} && r{3-i}_ref != pos{j} && r{i}_gripping == False"), a(f"r{i}_grip <- True")),
-                postcondition=Transition("post", g(f"r{i}_gripping == True"), a(f"block_in_r{i} = {j}, posb{j} = 0")),
-                effects=a(f"r{i}_gripping = True , block_in_r{i} = {j}, posb{j} = 0")
+                postcondition=Transition("post", g(f"r{i}_gripping == True"), a(f"block_in_r{i} = posb{j}, posb{j} = empty")),
+                effects=a(f"r{i}_gripping = True")
             )
     #Operations for dropping with r1 and r2 at pos 1,2,3
     for i in [1,2]:
@@ -133,8 +133,8 @@ def the_model() -> Model:
             ops[f"r{i}_drop_pos{j}"] = Operation(
                 name=f"r{i}_drop_pos{j}", 
                 precondition=Transition("pre", g(f"r{i}_ref == pos{j} && r{i}_gripping == True && posb{j} == empty"), a(f"r{i}_grip <- False")),
-                postcondition=Transition("post", g(f"r{i}_grip == False"), a(f"posb{j} = block_in_r{i}, block_in_r{i} = 0")),
-                effects=a(f"r{i}_gripping = False , posb{j} = block_in_r{i}, block_in_r{i} = 0")
+                postcondition=Transition("post", g(f"r{i}_grip == False"), a(f"posb{j} = block_in_r{i}, block_in_r{i} = empty")),
+                effects=a(f"r{i}_gripping = False")
             )
                 
     return Model(initial_state, ops)
