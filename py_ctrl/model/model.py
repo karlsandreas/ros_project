@@ -88,7 +88,7 @@ def the_model() -> Model:
 
     ops[f"r2_to_home"] = Operation(
         name=f"r2_to_home", 
-        precondition=Transition("pre", g(f"(r2_ref != home && r1_gripping == True)"), a(f"r2_ref <- home")),
+        precondition=Transition("pre", g(f"(r2_ref != home && r2_gripping == True)"), a(f"r2_ref <- home")),
         postcondition=Transition("post", g(f"r2_act == home"), ()),
         effects=a(f"r2_act <- home")
     )
