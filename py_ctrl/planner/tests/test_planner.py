@@ -179,6 +179,7 @@ def test_planner_real_model_full():
     # write a goal so that the cubes are at different positions than the inital ones
     goal = g("posb1 == blue_cube && posb2 == red_cube")
     p = plan(m.initial_state, goal, m, 10)
+
     assert p != None
     print(p)  
     for o in p:
@@ -189,6 +190,7 @@ def test_planner_real_model_full():
     # Look at the printout and see if it is correct and than add them here
     should_find = set(["r1_to_pos1","r1_grip_pos1","r1_to_home","r2_to_pos2","r2_grip_pos2","r2_to_pos1",
         "r2_drop_pos1","r1_to_pos2","r1_drop_pos2"
+
         
     ], )
     assert set(p) == should_find
