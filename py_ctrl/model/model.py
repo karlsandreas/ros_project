@@ -54,6 +54,40 @@ def the_model() -> Model:
     # we will store all operations in this dict that will be part of the model
     ops = {}
 
+    #appending operations in priority order
+
+    #Operations for gripping with r1 and r2 at pos 1,2,3
+    for i in [1,2]:
+        for j in [1,2,3]:
+            ops[f"r{i}_grip_pos{j}"] = Operation(
+                name=f"r{i}_grip_pos{j}", 
+                precondition=Transition("pre", g(f"r{i}_ref == pos{j} && r{3-i}_ref != pos{j} && r{i}_gripping == False"), a(f"r{i}_grip <- True")),
+                postcondition=Transition("post", g(f"r{i}_gripping == True"), a(f"block_in_r{i} = posb{j}, posb{j} = empty")),
+                effects=a(f"r{i}_gripping = True"),
+                weight = 1
+            )
+    #Operations for dropping with r1 and r2 at pos 1,2,3
+    for i in [1,2]:
+        for j in [1,2,3]:
+            ops[f"r{i}_drop_pos{j}"] = Operation(
+                name=f"r{i}_drop_pos{j}", 
+                precondition=Transition("pre", g(f"r{i}_ref == pos{j} && r{i}_gripping == True && posb{j} == empty"), a(f"r{i}_grip <- False")),
+                postcondition=Transition("post", g(f"r{i}_grip == False"), a(f"posb{j} = block_in_r{i}, block_in_r{i} = empty")),
+                effects=a(f"r{i}_gripping = False"),
+                weight = 1
+            )
+
+    #Operations for moving r1 and r2 arm to pos 1,2,3
+    for i in [1,2]:
+        for j in [1,2,3]:
+            ops[f"r{i}_to_pos{j}"] = Operation(
+                name=f"r{i}_to_pos{j}", 
+                precondition=Transition("pre", g(f"r{i}_ref != pos{j} && r{3-i}_ref != pos{j} && ((r{i}_gripping == True && posb{j} == empty) || (r{i}_gripping == False && posb{j} != empty))"), a(f"r{i}_ref <- pos{j}")),
+                postcondition=Transition("post", g(f"r{i}_act == pos{j}"), ()),
+                effects=a(f"r{i}_act <- pos{j}"),
+                weight = 2
+            )
+
     # this is maybe the simplest operation, to make the r1 (the small UR3e) robot
     # to go home
     ops[f"r1_to_home"] = Operation(
@@ -83,14 +117,16 @@ def the_model() -> Model:
 
         # The effect are only used while planning to change measured variables that will change when running 
         # the simulation. This is important if for example other operations have these as precondition guard.
-        effects=a(f"r1_act <- home")
+        effects=a(f"r1_act <- home"),
+        weight = 3
     )
 
     ops[f"r2_to_home"] = Operation(
         name=f"r2_to_home", 
         precondition=Transition("pre", g(f"(r2_ref != home && r2_gripping == True)"), a(f"r2_ref <- home")),
         postcondition=Transition("post", g(f"r2_act == home"), ()),
-        effects=a(f"r2_act <- home")
+        effects=a(f"r2_act <- home"),
+        weight = 3
     )
 
 
@@ -105,38 +141,9 @@ def the_model() -> Model:
     # here is another example of two dummy operations showing that you can use an iterator to 
     # create multiple operations at the same time
 
-    #Operations for moving r1 and r2 arm to pos 1,2,3
-    for i in [1,2]:
-        for j in [1,2,3]:
-            ops[f"r{i}_to_pos{j}"] = Operation(
-                name=f"r{i}_to_pos{j}", 
-                precondition=Transition("pre", g(f"r{i}_ref != pos{j} && r{3-i}_ref != pos{j} && ((r{i}_gripping == True && posb{j} == empty) || (r{i}_gripping == False && posb{j} != empty))"), a(f"r{i}_ref <- pos{j}")),
-                postcondition=Transition("post", g(f"r{i}_act == pos{j}"), ()),
-                effects=a(f"r{i}_act <- pos{j}"),
-            )
 
 
-    #Operations for gripping with r1 and r2 at pos 1,2,3
-    for i in [1,2]:
-        for j in [1,2,3]:
-            temp=initial_state.get(f"posb{j}")
-            ops[f"r{i}_grip_pos{j}"] = Operation(
-                name=f"r{i}_grip_pos{j}", 
-                precondition=Transition("pre", g(f"r{i}_ref == pos{j} && r{3-i}_ref != pos{j} && r{i}_gripping == False"), a(f"r{i}_grip <- True")),
 
-                postcondition=Transition("post", g(f"r{i}_gripping == True"), a(f"block_in_r{i} = posb{j}, posb{j} = empty")),
-                effects=a(f"r{i}_gripping = True")
-            )
-    #Operations for dropping with r1 and r2 at pos 1,2,3
-    for i in [1,2]:
-        for j in [1,2,3]:
-            temp=initial_state.get(f"block_in_r{i}")
-            ops[f"r{i}_drop_pos{j}"] = Operation(
-                name=f"r{i}_drop_pos{j}", 
-                precondition=Transition("pre", g(f"r{i}_ref == pos{j} && r{i}_gripping == True && posb{j} == empty"), a(f"r{i}_grip <- False")),
-                postcondition=Transition("post", g(f"r{i}_grip == False"), a(f"posb{j} = block_in_r{i}, block_in_r{i} = empty")),
-                effects=a(f"r{i}_gripping = False")
-            )
                 
     return Model(initial_state, ops)
 

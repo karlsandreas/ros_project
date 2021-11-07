@@ -53,8 +53,8 @@ def plan(state: State, goal: Guard, model: Model, max_depth: int = 20) -> Option
 
 def plan(state: State, goal: Guard, model: Model, max_depth: int = 20) -> Optional[List[str]]:
     stack = []
-    stack_and_op = [state,[]]
-    stack.append(stack_and_op) #stack is a nested list with state and operations to that state
+    state_op_weight = [state,[],1]
+    stack.append(state_op_weight) #stack is a nested list with state and operations to that state
 
     visited = []
     while stack:
@@ -68,23 +68,26 @@ def plan(state: State, goal: Guard, model: Model, max_depth: int = 20) -> Option
                 return state_copy[1]
             
             for op in model.operations:
-   
-                
                 next_state = model.operations[op].next_planning(state_copy[0])
-                model.operations[op].precondition.guard.eval(state_copy[0])
                 if model.operations[op].eval(state_copy[0]) and next_state not in visited:
-
+                    w = state_copy[2]
+                    weight = model.operations[op].weight + int(w)
+                    
                     ops_copy = state_copy[1].copy()
                     ops_copy.append(op)
+                    ops_weight = [ops_copy,weight]
                     if goal.eval(next_state):
+                        print("visited states, ", len(visited))
                         return ops_copy  #return list of operations
 
                     elif next_state not in stack:
-                        state_ops = [next_state,ops_copy]
-                        stack.append(state_ops)
+
+                        state_ops_weights = [next_state,ops_copy,weight]
+                        stack.append(state_ops_weights)
                     
                 state_copy = current_state.copy()
             visited.append(current_state[0])
+        stack = sorted(stack, key=lambda x:x[2])
     print("Number of visited ", len(visited))
     print("Stack empty")
     return None
