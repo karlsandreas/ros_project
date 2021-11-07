@@ -53,7 +53,7 @@ def plan(state: State, goal: Guard, model: Model, max_depth: int = 20) -> Option
 
 def plan(state: State, goal: Guard, model: Model, max_depth: int = 20) -> Optional[List[str]]:
     stack = []
-    state_op_weight = [state,[],1]
+    state_op_weight = [state,[],0]
     stack.append(state_op_weight) #stack is a nested list with state and operations to that state
 
     visited = []
@@ -72,10 +72,9 @@ def plan(state: State, goal: Guard, model: Model, max_depth: int = 20) -> Option
                 if model.operations[op].eval(state_copy[0]) and next_state not in visited:
                     w = state_copy[2]
                     weight = model.operations[op].weight + int(w)
-                    
                     ops_copy = state_copy[1].copy()
                     ops_copy.append(op)
-                    ops_weight = [ops_copy,weight]
+                   
                     if goal.eval(next_state):
                         print("visited states, ", len(visited))
                         return ops_copy  #return list of operations
