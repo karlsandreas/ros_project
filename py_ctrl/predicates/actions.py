@@ -47,6 +47,8 @@ class Assign(object):
                 x = state.get(self.value_or_variable)
             return state.next(**{self.variable: x})
         except NotInStateException as e:
+            global hej_test
+            hej_test ="det misslyckades!!"
             raise NextException(f"{e.message}")
 
 

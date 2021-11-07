@@ -6,6 +6,7 @@ import predicates.guards
 import predicates.actions
 from predicates.guards import AlwaysFalse, AlwaysTrue, Guard
 from handlers_msgs.msg import CubeState
+from py_ctrl.predicates import state
 
 @dataclass
 class Model(object):
@@ -33,13 +34,13 @@ def the_model() -> Model:
         # control variables
         r1_ref = "pos1",            #{home, pos1, pos2, pos3}
         r1_grip = False,
-        r2_ref = "pos2",            #{home, pos1, pos2, pos3}
+        r2_ref = "home",            #{home, pos1, pos2, pos3}
         r2_grip = False,
 
         # measured variables
         r1_act = "pos1",            #{home, pos1, pos2, pos3}
         r1_gripping = False,
-        r2_act = "pos2",            #{home, pos1, pos2, pos3}
+        r2_act = "home",            #{home, pos1, pos2, pos3}
         r2_gripping = False,
 
         #estimators for cube in each position
@@ -125,8 +126,8 @@ def the_model() -> Model:
             ops[f"r{i}_grip_pos{j}"] = Operation(
                 name=f"r{i}_grip_pos{j}", 
                 precondition=Transition("pre", g(f"r{i}_ref == pos{j} && r{3-i}_ref != pos{j} && r{i}_gripping == False"), a(f"r{i}_grip <- True")),
-                postcondition=Transition("post", g(f"r{i}_gripping == True"), a(f"block_in_r{i} <- posb{j}, posb{j} <- empty")),
-                effects=a(f"r{i}_gripping <- True , block_in_r{i} <- {temp}, posb{j} <- empty")
+                postcondition=Transition("post", g(f"r{i}_gripping == True"), a(f"block_in_r{i} <- {temp}, posb{j} <- empty")),
+                effects=a(f"r{i}_gripping <- True , block_in_r{i} <- posb{j} , posb{j} <- 'empty'")
             )
     #Operations for dropping with r1 and r2 at pos 1,2,3
     for i in [1,2]:
@@ -135,8 +136,8 @@ def the_model() -> Model:
             ops[f"r{i}_drop_pos{j}"] = Operation(
                 name=f"r{i}_drop_pos{j}", 
                 precondition=Transition("pre", g(f"r{i}_ref == pos{j} && r{i}_gripping == True && posb{j} == empty"), a(f"r{i}_grip <- False")),
-                postcondition=Transition("post", g(f"r{i}_grip == False "), a(f"posb{j} <- block_in_r{i}, block_in_r{i} <- empty")),
-                effects=a(f"r{i}_gripping <- False , posb{j} <- {temp}, block_in_r{i} <- empty")
+                postcondition=Transition("post", g(f"r{i}_grip == False "), a(f"posb{j} <- {temp}, block_in_r{i} <- empty")),
+                effects=a(f"r{i}_gripping <- False , posb{j} = block_in_r{i} , block_in_r{i} <- empty")
             )
                 
     return Model(initial_state, ops)
