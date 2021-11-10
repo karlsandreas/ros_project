@@ -66,7 +66,6 @@ def the_model() -> Model:
                 precondition=Transition("pre", g(f"r{i}_booked == False && r{i}_act != pos{j} && r{3-i}_act != pos{j} && ((r{i}_gripping == True && posb{j} == empty) || (r{i}_gripping == False && posb{j} != empty))"), a(f"r{i}_ref <- pos{j}, r{i}_booked = True")),
                 postcondition=Transition("post", g(f"r{i}_act == pos{j}"), a(f"r{i}_booked = False")),
                 effects=a(f"r{i}_act <- pos{j}"),
-                weight = 1
             )
 
 
