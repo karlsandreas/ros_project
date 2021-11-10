@@ -43,6 +43,8 @@ def the_model() -> Model:
         r2_gripping = False,
 
         #estimators for cube in each position
+        r1_booked = False,
+        r2_booked = False,
         posb1 = "red_cube",    # 1 is red, 2 is blue, 3 is green
         posb2 = "blue_cube",
         posb3 = "green_cube",
@@ -56,13 +58,25 @@ def the_model() -> Model:
 
     #appending operations in priority order
 
+    #Operations for moving r1 and r2 arm to pos 1,2,3
+    for i in [1,2]:
+        for j in [1,2,3]:
+            ops[f"r{i}_to_pos{j}"] = Operation(
+                name=f"r{i}_to_pos{j}", 
+                precondition=Transition("pre", g(f"r{i}_booked == False && r{i}_act != pos{j} && r{3-i}_act != pos{j} && ((r{i}_gripping == True && posb{j} == empty) || (r{i}_gripping == False && posb{j} != empty))"), a(f"r{i}_ref <- pos{j}, r{i}_booked = True")),
+                postcondition=Transition("post", g(f"r{i}_act == pos{j}"), a(f"r{i}_booked = False")),
+                effects=a(f"r{i}_act <- pos{j}"),
+                weight = 1
+            )
+
+
     #Operations for gripping with r1 and r2 at pos 1,2,3
     for i in [1,2]:
         for j in [1,2,3]:
             ops[f"r{i}_grip_pos{j}"] = Operation(
                 name=f"r{i}_grip_pos{j}", 
-                precondition=Transition("pre", g(f"r{i}_act == pos{j} && r{i}_gripping == False"), a(f"r{i}_grip <- True")),
-                postcondition=Transition("post", g(f"r{i}_gripping == True"), a(f"block_in_r{i} = posb{j}, posb{j} = empty")),
+                precondition=Transition("pre", g(f"r{i}_booked == False && r{i}_act == pos{j} && r{i}_gripping == False"), a(f"r{i}_grip <- True , r{i}_booked = True")),
+                postcondition=Transition("post", g(f"r{i}_gripping == True"), a(f"block_in_r{i} = posb{j}, posb{j} = empty , r{i}_booked = False")),
                 effects=a(f"r{i}_gripping = True"),
                 weight = 1
             )
@@ -71,22 +85,12 @@ def the_model() -> Model:
         for j in [1,2,3]:
             ops[f"r{i}_drop_pos{j}"] = Operation(
                 name=f"r{i}_drop_pos{j}", 
-                precondition=Transition("pre", g(f"r{i}_act == pos{j} && r{i}_gripping == True && posb{j} == empty"), a(f"r{i}_grip <- False")),
-                postcondition=Transition("post", g(f"r{i}_gripping == False"), a(f"posb{j} = block_in_r{i}, block_in_r{i} = empty")),
+                precondition=Transition("pre", g(f"r{i}_booked == False && r{i}_act == pos{j} && r{i}_gripping == True && posb{j} == empty"), a(f"r{i}_grip <- False, r{i}_booked = True")),
+                postcondition=Transition("post", g(f"r{i}_gripping == False"), a(f"posb{j} = block_in_r{i}, block_in_r{i} = empty, r{i}_booked = False")),
                 effects=a(f"r{i}_gripping = False"),
                 weight = 1
             )
 
-    #Operations for moving r1 and r2 arm to pos 1,2,3
-    for i in [1,2]:
-        for j in [1,2,3]:
-            ops[f"r{i}_to_pos{j}"] = Operation(
-                name=f"r{i}_to_pos{j}", 
-                precondition=Transition("pre", g(f"r{i}_act != pos{j} && r{3-i}_act != pos{j} && ((r{i}_gripping == True && posb{j} == empty) || (r{i}_gripping == False && posb{j} != empty))"), a(f"r{i}_ref <- pos{j}")),
-                postcondition=Transition("post", g(f"r{i}_act == pos{j}"), ()),
-                effects=a(f"r{i}_act <- pos{j}"),
-                weight = 2
-            )
 
     # this is maybe the simplest operation, to make the r1 (the small UR3e) robot
     # to go home
@@ -105,7 +109,7 @@ def the_model() -> Model:
         # call next(state) on the precondition transition. This will set the command variable r1_ref
         # to home so that the robot will go home. You can also add more actions here if for example
         # you need to block other operation to pre-start. You will read more about pre-start in the assignment
-        precondition=Transition("pre", g(f"(r1_act != home && r1_gripping == True)"), a(f"r1_ref <- home")),
+        precondition=Transition("pre", g(f"(r1_booked == False && r1_act != home)"), a(f"r1_ref <- home , r1_booked = True")),
 
         # the postcondition defines when the operation has completed by checking the measured variables. This 
         # will not be possible when we are planning, since we do not have the real system then, so when
@@ -113,20 +117,20 @@ def the_model() -> Model:
         # However, in the action of the postcondition you should update your estimated variables that you 
         # expect from the operation and that you did not change when you started the operation. For example, it
         # in these actions that you update where the cubes are. In this case, we do not have any actions.
-        postcondition=Transition("post", g(f"r1_act == home"), ()),
+        postcondition=Transition("post", g(f"r1_act == home"), a(f"r1_booked = False")),
 
         # The effect are only used while planning to change measured variables that will change when running 
         # the simulation. This is important if for example other operations have these as precondition guard.
         effects=a(f"r1_act <- home"),
-        weight = 3
+        weight = 1
     )
 
     ops[f"r2_to_home"] = Operation(
         name=f"r2_to_home", 
-        precondition=Transition("pre", g(f"(r2_act != home && r2_gripping == True)"), a(f"r2_ref <- home")),
-        postcondition=Transition("post", g(f"r2_act == home"), ()),
+        precondition=Transition("pre", g(f"(r2_booked == False && r2_act != home)"), a(f"r2_ref <- home, r2_booked = True")),
+        postcondition=Transition("post", g(f"r2_act == home"), a(f"r2_booked = False")),
         effects=a(f"r2_act <- home"),
-        weight = 3
+        weight = 1
     )
 
 

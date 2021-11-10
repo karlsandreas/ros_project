@@ -6,6 +6,7 @@ from predicates.guards import AlwaysTrue, AlwaysFalse
 from model.model import the_model, Model
 from model.operation import Operation, Transition
 from planner.plan import plan
+import time
 
 # ---------------------------------------------------------------------------
 # Test for the planner. The first tests can be used before the model is
@@ -175,11 +176,12 @@ def test_planner_real_model_1():
 # Use this test when you are working with the model 
 
 def test_planner_real_model_full():
+    start_time = time.time()
     m = the_model()
     # write a goal so that the cubes are at different positions than the inital ones
     goal = g("posb1 == blue_cube && posb2 == red_cube")
     p = plan(m.initial_state, goal, m, 20)
-
+    print("Run time is ", time.time()-start_time)
     assert p != None
     print(p)  
     for o in p:
@@ -189,7 +191,7 @@ def test_planner_real_model_full():
     # add all operations that should be parts of your solution.
     # Look at the printout and see if it is correct and than add them here
     should_find = set(["r1_to_pos1","r1_grip_pos1","r1_to_home","r2_to_pos2","r2_grip_pos2","r2_to_pos1",
-        "r2_drop_pos1","r1_to_pos2","r1_drop_pos2"
+        "r2_drop_pos1","r1_to_pos2"
 
         
     ], )
