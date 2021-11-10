@@ -78,7 +78,6 @@ def the_model() -> Model:
                 precondition=Transition("pre", g(f"r{i}_booked == False && r{i}_act == pos{j} && r{i}_gripping == False"), a(f"r{i}_grip <- True , r{i}_booked = True")),
                 postcondition=Transition("post", g(f"r{i}_gripping == True"), a(f"block_in_r{i} = posb{j}, posb{j} = empty , r{i}_booked = False")),
                 effects=a(f"r{i}_gripping = True"),
-                weight = 1
             )
     #Operations for dropping with r1 and r2 at pos 1,2,3block_in_r
     for i in [1,2]:
@@ -88,7 +87,6 @@ def the_model() -> Model:
                 precondition=Transition("pre", g(f"r{i}_booked == False && r{i}_act == pos{j} && r{i}_gripping == True && posb{j} == empty"), a(f"r{i}_grip <- False, r{i}_booked = True")),
                 postcondition=Transition("post", g(f"r{i}_gripping == False"), a(f"posb{j} = block_in_r{i}, block_in_r{i} = empty, r{i}_booked = False")),
                 effects=a(f"r{i}_gripping = False"),
-                weight = 1
             )
 
 
@@ -122,7 +120,6 @@ def the_model() -> Model:
         # The effect are only used while planning to change measured variables that will change when running 
         # the simulation. This is important if for example other operations have these as precondition guard.
         effects=a(f"r1_act <- home"),
-        weight = 1
     )
 
     ops[f"r2_to_home"] = Operation(
@@ -130,7 +127,6 @@ def the_model() -> Model:
         precondition=Transition("pre", g(f"(r2_booked == False && r2_act != home)"), a(f"r2_ref <- home, r2_booked = True")),
         postcondition=Transition("post", g(f"r2_act == home"), a(f"r2_booked = False")),
         effects=a(f"r2_act <- home"),
-        weight = 1
     )
 
 
