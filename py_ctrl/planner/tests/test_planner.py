@@ -34,30 +34,35 @@ def test_simple_planner_1():
         postcondition=Transition("post", AlwaysTrue(), a(f"v1")), 
         # the effects are only used when planning to simulate changes of sensors
         effects=(),
+        time=1,
     )
     o2 = Operation(
         name=f"o2", 
         precondition=Transition("pre", g("v1 && v2 == 0"), ()),
         postcondition=Transition("post", AlwaysTrue(), a(f"v2 += 1")),
         effects=(),
+        time=1,
     )
     o3 = Operation(
         name=f"o3", 
         precondition=Transition("pre", g("v1 && v2 == 0"), ()),
         postcondition=Transition("post", AlwaysTrue(), a(f"v2 += 2")),
         effects=(),
+        time=1,
     )
     o4 = Operation(
         name=f"o4", 
         precondition=Transition("pre", g("v1 && v2 == 2"), ()),
         postcondition=Transition("post", AlwaysTrue(), a(f"v2 += 1")),
         effects=(),
+        time=1,
     )
     o5 = Operation(
         name=f"o5", 
         precondition=Transition("pre", g("v1"), ()),
         postcondition=Transition("post", AlwaysTrue(), a(f"v2 <- 0")),
         effects=(),
+        time=1,
     )
     simple_model = Model(initial_state, {
         o1.name: o1,
@@ -95,6 +100,7 @@ def test_simple_planner_2():
             postcondition=Transition("post", AlwaysTrue(), a(f"v1")), 
             # the effects are only used when planning to simulate changes of sensors
             effects=(),
+            time=1,
         )
     
 
@@ -104,6 +110,7 @@ def test_simple_planner_2():
         precondition=Transition("pre", g("v1 && v2 == 0"), ()),
         postcondition=Transition("post", AlwaysTrue(), a(f"v2 += 1")),
         effects=(),
+        time=1,
     )
     model = Model(initial_state, ops)
 
@@ -132,6 +139,7 @@ def test_simple_planner_3():
             postcondition=Transition("post", AlwaysTrue(), a(f"v2 +=1")), 
             # the effects are only used when planning to simulate changes of sensors
             effects=(),
+            time=1,
         )
 
     ops["final"] = Operation(
@@ -139,6 +147,7 @@ def test_simple_planner_3():
         precondition=Transition("pre", g("v1 && v2 == 0"), ()),
         postcondition=Transition("post", AlwaysTrue(), a(f"v2 += 1")),
         effects=(),
+        time=1,
     )
     model = Model(initial_state, ops)
 
@@ -191,10 +200,14 @@ def test_planner_real_model_full():
     # add all operations that should be parts of your solution.
     # Look at the printout and see if it is correct and than add them here
     should_find = set(["r1_to_pos1","r1_grip_pos1","r1_to_home","r2_to_pos2","r2_grip_pos2","r2_to_pos1",
-        "r2_drop_pos1","r1_to_pos2"
+        "r2_drop_pos1","r1_to_pos2","r1_drop_pos2"
 
         
     ], )
+    test=set(p)
+    if test == should_find:
+        print(1)
+
     assert set(p) == should_find
 
 

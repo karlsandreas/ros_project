@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 from typing import ClassVar, List, Optional, Tuple
+
+from parsec import times
 import predicates.guards
 from predicates.state import State
 from predicates.guards import Eq, Guard, guards
@@ -46,7 +48,7 @@ class Operation(object):
     precondition: Transition
     postcondition: Transition
     effects: Tuple[Action, ...]
-    weight: int = 1
+    time: float
     """
     The operation represent a task that will take some time before completion, and is a good
     abstraction that can be used for both planning and control. The operation has a state variable

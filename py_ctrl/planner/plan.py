@@ -20,7 +20,7 @@ from predicates.actions import Action
 
     In the runner, there is a mode to pre-start operations, but that should not be considered while planning
 """
-
+acount_time=True
 
 def plan(state: State, goal: Guard, model: Model, max_depth: int = 20) -> Optional[List[str]]:
     stack = []
@@ -28,35 +28,35 @@ def plan(state: State, goal: Guard, model: Model, max_depth: int = 20) -> Option
     stack.append(state_op_weight) #stack is a nested list with state and operations to that state
 
     visited = set()
+
     while stack:
-        current_state = stack.pop(0) 
-        if len(current_state[1])>max_depth:
-            print("number of operations =", len(current_state[1]))
+        (current_state,operations,time) = stack.pop(0) 
+
+        if len(operations)>max_depth:
+            print("number of operations =", len(operations))
             return None
-        else:
-            state_copy = current_state.copy()
-            if goal.eval(state_copy[0]):
-                return state_copy[1]
+        
+        if goal.eval(current_state):
+            print("visited states, ", len(visited))
+            return operations  #return list of operations
+
+        if current_state not in visited:
+            visited.add(current_state)
             
             for op in model.operations:
-                next_state = model.operations[op].next_planning(state_copy[0])
-                if model.operations[op].eval(state_copy[0]) and next_state not in visited:
-                    w = state_copy[2]
-                    weight = model.operations[op].weight + int(w)
-                    ops_copy = state_copy[1].copy()
+                if model.operations[op].eval(current_state):
+                    next_state = model.operations[op].next_planning(current_state)
+                    new_time = model.operations[op].time + float(time)
+                    ops_copy = operations.copy()
                     ops_copy.append(op)
-                   
-                    if goal.eval(next_state):
-                        print("visited states, ", len(visited))
-                        return ops_copy  #return list of operations
+                        
+                    state_ops_time = [next_state,ops_copy,new_time]
+                    stack.append(state_ops_time)
 
-                    elif state_copy[0] not in stack:
+            if acount_time:
+                stack.sort(key=lambda x:x[2])
 
-                        state_ops_weights = [next_state,ops_copy,weight]
-                        stack.append(state_ops_weights)
-                    
-                state_copy = current_state.copy()
-            visited.add(current_state[0])
+
     print("Number of visited ", len(visited))
     print("Stack empty")
     return None
