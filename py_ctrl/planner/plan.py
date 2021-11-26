@@ -19,8 +19,8 @@ from predicates.actions import Action
     number of operations to reach the goal, not the shortest time.
 
     In the runner, there is a mode to pre-start operations, but that should not be considered while planning
-"""
 
+"""
 
 def plan(state: State, goal: Guard, model: Model, max_depth: int = 20) -> Optional[List[str]]:
     stack = []
@@ -29,34 +29,36 @@ def plan(state: State, goal: Guard, model: Model, max_depth: int = 20) -> Option
 
     visited = set()
     while stack:
-        current_state = stack.pop(0) 
-        if len(current_state[1])>max_depth:
-            print("number of operations =", len(current_state[1]))
+        (current_state, path, weights) = stack.pop(0) #Take out the first state from stack
+
+        if len(path)>max_depth:
+            print("number of operations =", len(path))
             return None
-        else:
-            state_copy = current_state.copy()
-            if goal.eval(state_copy[0]):
-                return state_copy[1]
+        
+        if goal.eval(current_state):
+            print("visited states, ", len(visited))
+            return path
+        
+        if current_state not in visited:
+
+            visited.add(current_state)
             
             for op in model.operations:
-                next_state = model.operations[op].next_planning(state_copy[0])
-                if model.operations[op].eval(state_copy[0]) and next_state not in visited:
-                    w = state_copy[2]
-                    weight = model.operations[op].weight + int(w)
-                    ops_copy = state_copy[1].copy()
-                    ops_copy.append(op)
-                   
-                    if goal.eval(next_state):
-                        print("visited states, ", len(visited))
-                        return ops_copy  #return list of operations
+                
+                if model.operations[op].eval(current_state):
+                    next_state = model.operations[op].next_planning(current_state)
+                    weight = model.operations[op].weight + int(weights)
+                    paths_copy = path.copy()
+                    paths_copy.append(op)
 
-                    elif state_copy[0] not in stack:
-
-                        state_ops_weights = [next_state,ops_copy,weight]
-                        stack.append(state_ops_weights)
+                    state_path_weights = [next_state,paths_copy,weight]
+                    stack.append(state_path_weights)
                     
-                state_copy = current_state.copy()
-            visited.add(current_state[0])
-    print("Number of visited ", len(visited))
+
+        if weights > 0: #If operations is weighted, sorts on weight
+            stack = sorted(stack, key=lambda x:x[2])
+                    
     print("Stack empty")
     return None
+
+
