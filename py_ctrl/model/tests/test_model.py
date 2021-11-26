@@ -20,14 +20,14 @@ def test_r1_to_home():
     m = the_model()
     ops = m.operations
 
-    test_state = m.initial_state.next(r1_ref = "pos1", r1_act = "pos1")
+    test_state = m.initial_state.next(r1_ref = "pos1", r1_act = "pos1",r1_gripping = True)
     o = ops["r1_to_home"]
     
     after_start = o.start(test_state)
     not_completed = o.is_completed(after_start)
     completed = o.is_completed(after_start.next(r1_act = "home"))
     after_completed = o.complete(after_start.next(r1_act = "home"))
-    
+
     assert o.eval(test_state)
     assert after_start == test_state.next(r1_ref = "home", r1_to_home = "e")
     assert not not_completed
@@ -106,7 +106,7 @@ def test_r2_to_home():
     m = the_model()
     ops = m.operations
 
-    test_state = m.initial_state.next(r2_ref = "pos1", r2_act = "pos1")
+    test_state = m.initial_state.next(r2_ref = "pos1", r2_act = "pos1", r2_gripping = True)
     o = ops["r2_to_home"]
     
     after_start = o.start(test_state)

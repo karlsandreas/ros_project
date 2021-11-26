@@ -3,4 +3,4 @@
 # inside the planner folder write: chmod +x ./send_goal.bash
 ros2 topic pub /goal \
     handlers_msgs/msg/CubeState \
-    "{'pos1':'green_cube', 'pos2':'blue_cube', 'pos3':'red_cube'}" 
+    "{'pos1':'green_cube', 'pos2':'red_cube', 'pos3':'blue_cube'}" 

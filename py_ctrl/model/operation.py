@@ -46,6 +46,7 @@ class Operation(object):
     precondition: Transition
     postcondition: Transition
     effects: Tuple[Action, ...]
+    weight: int = 1
     """
     The operation represent a task that will take some time before completion, and is a good
     abstraction that can be used for both planning and control. The operation has a state variable

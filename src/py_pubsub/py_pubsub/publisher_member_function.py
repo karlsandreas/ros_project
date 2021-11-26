@@ -15,47 +15,25 @@
 import rclpy
 from rclpy.node import Node
 
-<<<<<<< HEAD
-from std_msgs.msg import String
-from geometry_msgs.msg import Twist
-
-=======
 ##from std_msgs.msg import String
 from geometry_msgs.msg import Twist
 
 
->>>>>>> master
 class MinimalPublisher(Node):
 
     def __init__(self):
         super().__init__('minimal_publisher')
         self.publisher_ = self.create_publisher(Twist, 'turtle1/cmd_vel', 10)
-<<<<<<< HEAD
-        timer_period = 0.5 # seconds
-        self.timer = self.create_timer(timer_period, self.timer_callback)
-        self.i = 0
-
-
-    def timer_callback(self):
-        msg = Twist()
-        msg.linear.x = 1.0 + (self.i/10)**2
-        #msg.linear.y = 0.5 +. self.i/10
-        msg.angular.z = 2.0 
-     
-        self.publisher_.publish(msg)
-        #self.get_logger().info(msg.angular.z)
-=======
         timer_period = 0.5  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
         self.i = 0
 
     def timer_callback(self):
         msg = Twist()
-        msg.linear.x = 1.0
-        msg.angular.z =2.0*self.i
+        msg.linear.x = 1.0*(self.i/10)**2
+        msg.angular.z = 2.0
         self.publisher_.publish(msg)
         #self.get_logger().info('Publishing: "%s"' % msg.angular[0])
->>>>>>> master
         self.i += 1
 
 
